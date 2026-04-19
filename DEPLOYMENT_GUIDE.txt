@@ -1,0 +1,141 @@
+# CA Task Manager – Deployment Guide
+## How to go live on akshaysanepara.com in 20 minutes (Free)
+
+---
+
+## FILES YOU HAVE
+- index.html   → Main app
+- manifest.json → PWA metadata
+- sw.js         → Offline service worker
+
+You also need 2 icon files (instructions below):
+- icon-192.png  → 192×192 px app icon
+- icon-512.png  → 512×512 px app icon
+
+---
+
+## STEP 1 – Create App Icons (2 min, free)
+
+Go to: https://favicon.io/favicon-generator/
+- Text: "CA"
+- Background: Rounded
+- Background color: #3b4fd8
+- Font color: #ffffff
+- Font family: Serif
+
+Download → extract the ZIP → rename files:
+  android-chrome-192x192.png → icon-192.png
+  android-chrome-512x512.png → icon-512.png
+
+---
+
+## STEP 2 – Create GitHub Repository (5 min)
+
+1. Go to https://github.com → Sign up free (or log in)
+2. Click "New repository"
+3. Name: catasks  (or any name)
+4. Set to Public
+5. Click "Create repository"
+
+Upload these 5 files:
+  index.html
+  manifest.json
+  sw.js
+  icon-192.png
+  icon-512.png
+
+---
+
+## STEP 3 – Enable GitHub Pages (2 min)
+
+1. In your repository → click "Settings" tab
+2. Scroll to "Pages" in left sidebar
+3. Under "Source" → select "Deploy from a branch"
+4. Branch: main, Folder: / (root)
+5. Click Save
+
+Your app is now live at:
+  https://YOUR-USERNAME.github.io/catasks/
+
+Test it in your phone browser before next step.
+
+---
+
+## STEP 4 – Link akshaysanepara.com (10 min)
+
+### In GitHub:
+1. Settings → Pages → Custom domain
+2. Type: tasks.akshaysanepara.com  (subdomain)
+3. Click Save
+
+### In your Domain Registrar (GoDaddy / BigRock / etc.):
+1. Log in → DNS Management for akshaysanepara.com
+2. Add a CNAME record:
+   - Type:  CNAME
+   - Name:  tasks
+   - Value: YOUR-USERNAME.github.io
+   - TTL:   600 (or Auto)
+3. Save
+
+Wait 5–15 minutes for DNS to propagate.
+
+Your app will be live at:
+  https://tasks.akshaysanepara.com
+
+---
+
+## STEP 5 – Install on Phone (30 seconds)
+
+### Android (Chrome):
+  Open tasks.akshaysanepara.com in Chrome
+  Tap the 3-dot menu → "Add to Home Screen"
+  Tap "Add" → App appears on home screen!
+
+### iPhone (Safari):
+  Open tasks.akshaysanepara.com in Safari
+  Tap the Share button (box with arrow)
+  Scroll down → "Add to Home Screen"
+  Tap "Add"
+
+---
+
+## DONE! Your personal CA Task Manager is live.
+
+Features working:
+✅ Add tasks with client, work details, due date, priority
+✅ Categories: General Task, Call, Data Pending, Tender, Appeal, Notice Reply
+✅ Status: Open → In Progress → Stuck → Done
+✅ Overdue alerts highlighted in red
+✅ Search by client name or work
+✅ Edit any task
+✅ Works offline (data saved on your phone)
+✅ Looks like a native app on home screen
+
+---
+
+## UPDATING THE APP IN FUTURE
+
+1. Edit index.html on your computer
+2. Go to GitHub → your repo → index.html → Edit (pencil icon)
+3. Paste new code → Commit changes
+4. App updates automatically within minutes!
+
+Or use the GitHub mobile app to edit files directly.
+
+---
+
+## COST SUMMARY
+| Item            | Cost   |
+|-----------------|--------|
+| GitHub Pages    | FREE   |
+| Service Worker  | FREE   |
+| App icons       | FREE   |
+| Domain linking  | FREE   |
+| Your domain     | Already owned |
+| TOTAL           | ₹0    |
+
+---
+
+## SUPPORT
+If you need help at any step, just ask Claude and share
+which step you're stuck at!

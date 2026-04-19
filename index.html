@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#3b4fd8"/>
+<meta name="description" content="CA Task Manager – Personal task tracker for Chartered Accountants"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="CA Tasks"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<title>CA Task Manager</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#1a1a2e;--ink2:#4a4a6a;--ink3:#8888aa;
+  --surface:#ffffff;--surface2:#f7f7fb;--surface3:#eeeef8;
+  --accent:#3b4fd8;--accent2:#e8eaff;--accent3:#c7cbf7;
+  --green:#16a34a;--green2:#dcfce7;
+  --amber:#d97706;--amber2:#fef3c7;
+  --red:#dc2626;--red2:#fee2e2;
+  --blue:#0369a1;--blue2:#e0f2fe;
+  --purple:#7c3aed;--purple2:#ede9fe;
+  --border:#e5e5f0;
+  --r:14px;--r2:10px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--surface2);
+  color:var(--ink);
+  min-height:100vh;
+  min-height:100dvh;
+  overscroll-behavior:none;
+}
+
+/* LAYOUT */
+.app{max-width:680px;margin:0 auto;padding:16px 16px calc(80px + var(--safe-bottom)) 16px}
+
+/* HEADER */
+.header{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px 20px;
+  margin-bottom:14px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:12px;z-index:10;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 2px 16px rgba(59,79,216,.06);
+}
+.logo{
+  font-family:'Instrument Serif',serif;
+  font-size:20px;color:var(--ink);
+  display:flex;align-items:center;gap:8px;
+}
+.logo-sub{
+  font-family:'DM Sans',sans-serif;
+  font-size:10px;font-weight:600;color:var(--accent);
+  background:var(--accent2);padding:3px 9px;
+  border-radius:20px;letter-spacing:.6px;
+}
+.header-right{text-align:right}
+.today-date{font-size:11px;color:var(--ink3);font-weight:400;line-height:1.4}
+.today-day{font-size:13px;color:var(--ink2);font-weight:600}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.stat{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:14px 10px;text-align:center;
+  cursor:pointer;transition:transform .12s;
+}
+.stat:active{transform:scale(.97)}
+.stat-num{font-size:26px;font-weight:700;line-height:1;letter-spacing:-1px}
+.stat-label{font-size:10px;color:var(--ink3);margin-top:4px;font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+
+/* TYPE TABS */
+.tabs-wrap{overflow-x:auto;margin-bottom:10px;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.section-tabs{display:flex;gap:6px;width:max-content;padding:2px 0}
+.tab{
+  padding:7px 14px;border-radius:20px;font-size:13px;font-weight:500;
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--ink2);cursor:pointer;white-space:nowrap;transition:all .15s;
+}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tab:active:not(.active){background:var(--surface3)}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.f-btn{
+  font-size:12px;padding:5px 12px;border-radius:20px;
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--ink2);cursor:pointer;font-weight:500;transition:all .15s;
+}
+.f-btn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* ADD BUTTON (FAB) */
+.fab{
+  position:fixed;
+  bottom:calc(20px + var(--safe-bottom));
+  left:50%;transform:translateX(-50%);
+  background:var(--accent);color:#fff;
+  border:none;border-radius:30px;
+  padding:15px 32px;
+  font-size:15px;font-weight:600;
+  cursor:pointer;z-index:50;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 6px 24px rgba(59,79,216,.38);
+  transition:transform .12s, box-shadow .12s;
+  letter-spacing:.2px;
+  white-space:nowrap;
+}
+.fab:active{transform:translateX(-50%) scale(.96);box-shadow:0 3px 12px rgba(59,79,216,.28)}
+.fab-plus{font-size:20px;font-weight:300;line-height:1}
+
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:12px}
+.search-input{
+  width:100%;border:1px solid var(--border);border-radius:var(--r2);
+  padding:10px 12px 10px 38px;font-size:14px;
+  font-family:'DM Sans',sans-serif;background:var(--surface);
+  color:var(--ink);outline:none;transition:border .15s;
+}
+.search-input:focus{border-color:var(--accent3)}
+.search-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+
+/* MODAL */
+.modal-bg{
+  position:fixed;inset:0;
+  background:rgba(26,26,46,.5);
+  display:flex;align-items:flex-end;justify-content:center;
+  z-index:200;
+  opacity:0;transition:opacity .2s;
+  pointer-events:none;
+}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--surface);
+  border-radius:24px 24px 0 0;
+  padding:24px 20px calc(24px + var(--safe-bottom));
+  width:100%;max-width:680px;
+  max-height:92vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);
+  -webkit-overflow-scrolling:touch;
+}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-family:'Instrument Serif',serif;font-size:22px;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+
+/* TYPE GRID IN MODAL */
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.type-btn{
+  border:1.5px solid var(--border);border-radius:var(--r2);
+  padding:11px 8px;text-align:center;cursor:pointer;
+  font-size:12px;font-weight:500;background:var(--surface);
+  transition:all .15s;line-height:1.4;
+}
+.type-btn:active{transform:scale(.96)}
+.type-btn.sel{border-color:var(--accent);background:var(--accent2);color:var(--accent)}
+.t-ico{font-size:20px;display:block;margin-bottom:5px}
+
+/* FORM FIELDS */
+.field{margin-bottom:14px}
+.field label{
+  display:block;font-size:11px;font-weight:700;
+  color:var(--ink3);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;
+}
+.field input,.field select,.field textarea{
+  width:100%;border:1px solid var(--border);border-radius:var(--r2);
+  padding:11px 14px;font-size:15px;
+  font-family:'DM Sans',sans-serif;background:var(--surface);
+  color:var(--ink);outline:none;transition:border .15s;
+  -webkit-appearance:none;appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field textarea{resize:none;height:80px;line-height:1.5}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238888aa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-actions{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:8px}
+.btn-cancel{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r2);padding:13px;
+  font-size:14px;font-weight:600;cursor:pointer;color:var(--ink2);
+  font-family:'DM Sans',sans-serif;
+}
+.btn-save{
+  background:var(--accent);color:#fff;border:none;
+  border-radius:var(--r2);padding:13px;
+  font-size:14px;font-weight:600;cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  transition:opacity .15s;
+}
+.btn-save:active{opacity:.85}
+
+/* TASK CARDS */
+.task-list{display:flex;flex-direction:column;gap:10px}
+.empty{text-align:center;padding:50px 20px;color:var(--ink3)}
+.e-ico{font-size:44px;margin-bottom:12px}
+.empty p{font-size:14px;line-height:1.6}
+
+.task-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:0;
+  transition:box-shadow .15s;
+  position:relative;overflow:hidden;
+}
+.task-card.done-card{opacity:.7}
+.left-bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
+.card-inner{padding:16px 16px 14px 20px}
+.tc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.tc-client{font-weight:700;font-size:15px;color:var(--ink);line-height:1.3}
+.tc-type-badge{
+  font-size:10px;font-weight:700;
+  padding:3px 9px;border-radius:20px;
+  letter-spacing:.4px;white-space:nowrap;flex-shrink:0;text-transform:uppercase;
+}
+.tc-work{font-size:13px;color:var(--ink2);margin-bottom:10px;line-height:1.55}
+.tc-notes{font-size:12px;color:var(--ink3);margin-top:4px;font-style:italic}
+.tc-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.meta-pill{
+  font-size:11px;padding:3px 9px;border-radius:20px;
+  font-weight:600;display:inline-flex;align-items:center;gap:4px;
+}
+.tc-actions{
+  display:flex;gap:6px;margin-top:12px;padding:10px 20px 14px;
+  border-top:1px solid var(--border);flex-wrap:wrap;
+}
+.act-btn{
+  padding:7px 13px;border-radius:var(--r2);
+  font-size:12px;font-weight:600;
+  border:1px solid var(--border);cursor:pointer;
+  transition:all .15s;background:var(--surface2);
+  color:var(--ink2);font-family:'DM Sans',sans-serif;
+}
+.act-btn.complete{background:var(--green2);color:var(--green);border-color:var(--green2)}
+.act-btn.complete:active{background:#bbf7d0}
+.act-btn.inprog{background:var(--blue2);color:var(--blue);border-color:var(--blue2)}
+.act-btn.stuck-btn{background:var(--red2);color:var(--red);border-color:var(--red2)}
+.act-btn.del{background:var(--red2);color:var(--red);border-color:var(--red2);margin-left:auto}
+.act-btn.reopen{background:var(--surface2);color:var(--ink2)}
+.done-label{font-size:12px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:6px;padding-top:2px}
+
+/* SECTION HEADING */
+.section-title{font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px;padding-left:2px}
+
+/* EDIT MODAL extra */
+.edit-status-row{display:flex;gap:8px;margin-bottom:14px}
+.status-opt{flex:1;border:1.5px solid var(--border);border-radius:var(--r2);padding:8px 6px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.status-opt.sel-s{border-width:2px}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:calc(90px + var(--safe-bottom));left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:#1a1a2e;color:#fff;
+  padding:10px 20px;border-radius:30px;
+  font-size:13px;font-weight:500;
+  opacity:0;transition:all .25s;z-index:300;
+  pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* OVERDUE WARNING */
+.overdue-row{background:var(--red2);border-radius:var(--r2);padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--red);font-weight:600;cursor:pointer}
+
+/* INSTALL BANNER */
+.install-banner{
+  background:linear-gradient(135deg,var(--accent2),#f0f0ff);
+  border:1px solid var(--accent3);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:14px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.install-text{font-size:13px;color:var(--accent);font-weight:500}
+.install-text strong{display:block;font-size:14px;font-weight:700}
+.install-btn{
+  background:var(--accent);color:#fff;border:none;
+  border-radius:var(--r2);padding:9px 16px;
+  font-size:13px;font-weight:700;cursor:pointer;
+  white-space:nowrap;font-family:'DM Sans',sans-serif;
+}
+.hidden{display:none!important}
+
+@media(max-width:480px){
+  .stats{gap:6px}.stat{padding:12px 8px}.stat-num{font-size:22px}
+  .type-grid{grid-template-columns:repeat(3,1fr)}
+  .row2{grid-template-columns:1fr}
+  .modal{padding:20px 16px calc(20px + var(--safe-bottom))}
+}
+</style>
+</head>
+<body>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner hidden" id="installBanner">
+  <div class="install-text">
+    <strong>📲 Install as App</strong>
+    Add to home screen for offline access
+  </div>
+  <button class="install-btn" id="installBtn">Install</button>
+</div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <span style="font-size:22px">⚖️</span>
+      CA Tasks
+      <span class="logo-sub">PERSONAL</span>
+    </div>
+    <div class="header-right">
+      <div class="today-day" id="todayDay"></div>
+      <div class="today-date" id="todayDate"></div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats" id="statsBar">
+    <div class="stat" onclick="filterByStatus('all')">
+      <div class="stat-num" id="s-total">0</div>
+      <div class="stat-label">Total</div>
+    </div>
+    <div class="stat" onclick="filterByStatus('open')">
+      <div class="stat-num" style="color:var(--amber)" id="s-open">0</div>
+      <div class="stat-label">Open</div>
+    </div>
+    <div class="stat" onclick="filterByStatus('inprogress')">
+      <div class="stat-num" style="color:var(--blue)" id="s-inprog">0</div>
+      <div class="stat-label">In Prog</div>
+    </div>
+    <div class="stat" onclick="filterByStatus('done')">
+      <div class="stat-num" style="color:var(--green)" id="s-done">0</div>
+      <div class="stat-label">Done</div>
+    </div>
+  </div>
+
+  <!-- OVERDUE ALERT -->
+  <div class="overdue-row hidden" id="overdueRow" onclick="filterByStatus('overdue')">
+    <span>⚠️</span>
+    <span id="overdueText"></span>
+    <span style="margin-left:auto;font-size:11px">View →</span>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <span class="search-ico">🔍</span>
+    <input class="search-input" id="searchInput" placeholder="Search by client name or work…" oninput="render()"/>
+  </div>
+
+  <!-- TYPE TABS -->
+  <div class="tabs-wrap">
+    <div class="section-tabs" id="typeTabs">
+      <div class="tab active" data-type="all">All</div>
+      <div class="tab" data-type="task">📌 Task</div>
+      <div class="tab" data-type="call">📞 Call</div>
+      <div class="tab" data-type="data">📂 Data</div>
+      <div class="tab" data-type="tender">📄 Tender</div>
+      <div class="tab" data-type="appeal">⚖️ Appeal</div>
+      <div class="tab" data-type="notice">📬 Notice</div>
+      <div class="tab" data-type="other">📎 Other</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar" id="filterBar">
+    <div class="f-btn active" data-status="all">All</div>
+    <div class="f-btn" data-status="open">Open</div>
+    <div class="f-btn" data-status="inprogress">In Progress</div>
+    <div class="f-btn" data-status="stuck">Stuck</div>
+    <div class="f-btn" data-status="done">Completed</div>
+    <div class="f-btn" data-status="overdue" style="color:var(--red)">⚠️ Overdue</div>
+  </div>
+
+  <!-- TASK LIST -->
+  <div class="task-list" id="taskList"></div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="openModal">
+  <span class="fab-plus">+</span> Add Task
+</button>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modalBox">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">📋 New Task</div>
+
+    <!-- TYPE SELECTOR -->
+    <div class="type-grid" id="typeGrid">
+      <div class="type-btn sel" data-val="task"><span class="t-ico">📌</span>General Task</div>
+      <div class="type-btn" data-val="call"><span class="t-ico">📞</span>Call to Make</div>
+      <div class="type-btn" data-val="data"><span class="t-ico">📂</span>Data Pending</div>
+      <div class="type-btn" data-val="tender"><span class="t-ico">📄</span>Tender</div>
+      <div class="type-btn" data-val="appeal"><span class="t-ico">⚖️</span>Appeal / Hearing</div>
+      <div class="type-btn" data-val="notice"><span class="t-ico">📬</span>Notice Reply</div>
+    </div>
+
+    <!-- STATUS (edit mode only) -->
+    <div class="field hidden" id="statusField">
+      <label>STATUS</label>
+      <div class="edit-status-row">
+        <div class="status-opt" data-sv="open" style="color:var(--amber);border-color:var(--amber2);background:var(--amber2)">Open</div>
+        <div class="status-opt" data-sv="inprogress" style="color:var(--blue);border-color:var(--blue2);background:var(--blue2)">In Progress</div>
+        <div class="status-opt" data-sv="stuck" style="color:var(--red);border-color:var(--red2);background:var(--red2)">Stuck</div>
+        <div class="status-opt" data-sv="done" style="color:var(--green);border-color:var(--green2);background:var(--green2)">Done</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Client Name *</label>
+      <input id="f-client" placeholder="e.g. Mehta Industries Pvt Ltd" autocomplete="off"/>
+    </div>
+    <div class="field">
+      <label>Work Details *</label>
+      <textarea id="f-work" placeholder="Describe what needs to be done…"></textarea>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Due Date *</label>
+        <input type="date" id="f-due"/>
+      </div>
+      <div class="field">
+        <label>Priority</label>
+        <select id="f-priority">
+          <option value="normal">Normal</option>
+          <option value="high">🟠 High</option>
+          <option value="urgent">🔴 Urgent</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Notes / Remarks</label>
+      <input id="f-notes" placeholder="Any additional info, document ref, contact…" autocomplete="off"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="closeModal">Cancel</button>
+      <button class="btn-save" id="saveTask">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA TYPES ───────────────────────────────────────────────
+const TYPES = {
+  task:   {label:'General Task', ico:'📌', color:'var(--accent)',  bg:'var(--accent2)'},
+  call:   {label:'Call',         ico:'📞', color:'var(--green)',   bg:'var(--green2)'},
+  data:   {label:'Data Pending', ico:'📂', color:'var(--amber)',   bg:'var(--amber2)'},
+  tender: {label:'Tender',       ico:'📄', color:'var(--purple)',  bg:'var(--purple2)'},
+  appeal: {label:'Appeal',       ico:'⚖️', color:'var(--red)',    bg:'var(--red2)'},
+  notice: {label:'Notice Reply', ico:'📬', color:'var(--blue)',    bg:'var(--blue2)'},
+  other:  {label:'Other',        ico:'📎', color:'var(--ink2)',    bg:'var(--surface3)'},
+};
+const STATUS = {
+  open:       {label:'Open',        color:'var(--amber)', bg:'var(--amber2)'},
+  inprogress: {label:'In Progress', color:'var(--blue)',  bg:'var(--blue2)'},
+  stuck:      {label:'Stuck',       color:'var(--red)',   bg:'var(--red2)'},
+  done:       {label:'Done',        color:'var(--green)', bg:'var(--green2)'},
+};
+
+// ─── STATE ────────────────────────────────────────────────────
+let tasks     = JSON.parse(localStorage.getItem('ca_tasks_v2') || '[]');
+let filterType   = 'all';
+let filterStatus = 'all';
+let selType      = 'task';
+let editId       = null;
+let editStatus   = 'open';
+
+const save = () => localStorage.setItem('ca_tasks_v2', JSON.stringify(tasks));
+const $    = id  => document.getElementById(id);
+
+// ─── DATE HEADER ──────────────────────────────────────────────
+const now = new Date();
+$('todayDay').textContent  = now.toLocaleDateString('en-IN',{weekday:'long'});
+$('todayDate').textContent = now.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+
+// ─── OVERDUE CHECK ────────────────────────────────────────────
+function isOverdue(due, status) {
+  if (status === 'done') return false;
+  return new Date(due + 'T00:00:00') < new Date(new Date().toDateString());
+}
+
+// ─── TABS + FILTERS ───────────────────────────────────────────
+document.querySelectorAll('#typeTabs .tab').forEach(t => {
+  t.onclick = () => {
+    filterType = t.dataset.type;
+    document.querySelectorAll('#typeTabs .tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    render();
+  };
+});
+document.querySelectorAll('#filterBar .f-btn').forEach(b => {
+  b.onclick = () => {
+    filterStatus = b.dataset.status;
+    document.querySelectorAll('#filterBar .f-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    render();
+  };
+});
+function filterByStatus(s) {
+  filterStatus = s;
+  document.querySelectorAll('#filterBar .f-btn').forEach(x => {
+    x.classList.toggle('active', x.dataset.status === s);
+  });
+  render();
+}
+
+// ─── MODAL OPEN/CLOSE ─────────────────────────────────────────
+function openAddModal() {
+  editId     = null;
+  editStatus = 'open';
+  selType    = 'task';
+  $('modalTitle').textContent = '📋 New Task';
+  $('f-client').value   = '';
+  $('f-work').value     = '';
+  $('f-notes').value    = '';
+  $('f-priority').value = 'normal';
+  $('f-due').value      = new Date().toISOString().split('T')[0];
+  $('statusField').classList.add('hidden');
+  document.querySelectorAll('#typeGrid .type-btn').forEach(b => {
+    b.classList.toggle('sel', b.dataset.val === 'task');
+  });
+  $('modalBg').classList.add('open');
+}
+function openEditModal(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  editId     = id;
+  editStatus = t.status;
+  selType    = t.type;
+  $('modalTitle').textContent = '✏️ Edit Task';
+  $('f-client').value   = t.client;
+  $('f-work').value     = t.work;
+  $('f-notes').value    = t.notes || '';
+  $('f-priority').value = t.priority || 'normal';
+  $('f-due').value      = t.due;
+  $('statusField').classList.remove('hidden');
+  document.querySelectorAll('#typeGrid .type-btn').forEach(b => {
+    b.classList.toggle('sel', b.dataset.val === t.type);
+  });
+  document.querySelectorAll('.status-opt').forEach(b => {
+    b.classList.toggle('sel-s', b.dataset.sv === t.status);
+  });
+  $('modalBg').classList.add('open');
+}
+function closeModal() { $('modalBg').classList.remove('open'); }
+
+$('openModal').onclick = openAddModal;
+$('closeModal').onclick = closeModal;
+$('modalBg').onclick = e => { if (e.target === $('modalBg')) closeModal(); };
+
+// ─── TYPE SELECT IN MODAL ─────────────────────────────────────
+document.querySelectorAll('#typeGrid .type-btn').forEach(b => {
+  b.onclick = () => {
+    selType = b.dataset.val;
+    document.querySelectorAll('#typeGrid .type-btn').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+  };
+});
+// Status select in edit
+document.querySelectorAll('.status-opt').forEach(b => {
+  b.onclick = () => {
+    editStatus = b.dataset.sv;
+    document.querySelectorAll('.status-opt').forEach(x => x.classList.remove('sel-s'));
+    b.classList.add('sel-s');
+  };
+});
+
+// ─── SAVE ─────────────────────────────────────────────────────
+$('saveTask').onclick = () => {
+  const client = $('f-client').value.trim();
+  const work   = $('f-work').value.trim();
+  const due    = $('f-due').value;
+  if (!client || !work || !due) {
+    showToast('⚠️ Fill Client, Work Details & Due Date');
+    return;
+  }
+  if (editId) {
+    const t = tasks.find(x => x.id === editId);
+    if (t) {
+      t.type     = selType;
+      t.client   = client;
+      t.work     = work;
+      t.due      = due;
+      t.priority = $('f-priority').value;
+      t.notes    = $('f-notes').value.trim();
+      t.status   = editStatus;
+    }
+    showToast('✅ Task updated');
+  } else {
+    tasks.unshift({
+      id:       Date.now(),
+      type:     selType,
+      client,work,due,
+      priority: $('f-priority').value,
+      notes:    $('f-notes').value.trim(),
+      status:   'open',
+      created:  new Date().toISOString(),
+    });
+    showToast('✅ Task added');
+  }
+  save();
+  render();
+  closeModal();
+};
+
+// ─── ACTIONS ──────────────────────────────────────────────────
+window.setStatus = (id, status) => {
+  const t = tasks.find(x => x.id === id);
+  if (t) { t.status = status; save(); render(); }
+};
+window.deleteTask = id => {
+  if (confirm('Delete this task permanently?')) {
+    tasks = tasks.filter(x => x.id !== id);
+    save(); render();
+    showToast('🗑️ Task deleted');
+  }
+};
+window.editTask = id => openEditModal(id);
+
+// ─── TOAST ────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─── RENDER ───────────────────────────────────────────────────
+function render() {
+  const query = ($('searchInput').value || '').toLowerCase().trim();
+  const today2 = new Date(new Date().toDateString());
+
+  // stats (always from all tasks)
+  const open   = tasks.filter(t => t.status === 'open').length;
+  const inp    = tasks.filter(t => t.status === 'inprogress').length;
+  const done   = tasks.filter(t => t.status === 'done').length;
+  const od     = tasks.filter(t => isOverdue(t.due, t.status)).length;
+  $('s-total').textContent = tasks.length;
+  $('s-open').textContent  = open;
+  $('s-inprog').textContent= inp;
+  $('s-done').textContent  = done;
+
+  // overdue row
+  if (od > 0) {
+    $('overdueRow').classList.remove('hidden');
+    $('overdueText').textContent = `${od} task${od>1?'s':''} overdue! Tap to view`;
+  } else {
+    $('overdueRow').classList.add('hidden');
+  }
+
+  // filter
+  let filtered = tasks.filter(t => {
+    if (filterType !== 'all' && t.type !== filterType) return false;
+    if (filterStatus === 'overdue')    return isOverdue(t.due, t.status);
+    if (filterStatus !== 'all' && t.status !== filterStatus) return false;
+    if (query) {
+      return t.client.toLowerCase().includes(query) ||
+             t.work.toLowerCase().includes(query) ||
+             (t.notes||'').toLowerCase().includes(query);
+    }
+    return true;
+  });
+
+  const tl = $('taskList');
+  if (!filtered.length) {
+    tl.innerHTML = `<div class="empty"><div class="e-ico">🗂️</div><p>No tasks found.<br>Tap <strong>+ Add Task</strong> to get started.</p></div>`;
+    return;
+  }
+
+  tl.innerHTML = filtered.map(t => {
+    const tp = TYPES[t.type] || TYPES.other;
+    const st = STATUS[t.status] || STATUS.open;
+    const od2 = isOverdue(t.due, t.status);
+    const dStr = new Date(t.due+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    const dDiff = Math.ceil((new Date(t.due+'T00:00:00') - today2)/(1000*60*60*24));
+    let dueLabel = '';
+    if      (od2)         dueLabel = ' (OVERDUE)';
+    else if (dDiff === 0) dueLabel = ' (Today!)';
+    else if (dDiff === 1) dueLabel = ' (Tomorrow)';
+    else if (dDiff <= 3)  dueLabel = ` (${dDiff}d)`;
+
+    const pri = t.priority === 'urgent' ? '🔴 Urgent' : t.priority === 'high' ? '🟠 High' : '';
+
+    return `<div class="task-card${t.status==='done'?' done-card':''}">
+      <div class="left-bar" style="background:${tp.color}"></div>
+      <div class="card-inner">
+        <div class="tc-top">
+          <div class="tc-client">${tp.ico} ${t.client}</div>
+          <span class="tc-type-badge" style="color:${tp.color};background:${tp.bg}">${tp.label}</span>
+        </div>
+        <div class="tc-work">${t.work}${t.notes?`<div class="tc-notes">📎 ${t.notes}</div>`:''}</div>
+        <div class="tc-meta">
+          <span class="meta-pill" style="background:${od2?'var(--red2)':'var(--surface3)'};color:${od2?'var(--red)':'var(--ink3)'}">📅 ${dStr}${dueLabel}</span>
+          <span class="meta-pill" style="background:${st.bg};color:${st.color}">${st.label}</span>
+          ${pri?`<span class="meta-pill" style="background:var(--surface3);color:var(--ink2)">${pri}</span>`:''}
+        </div>
+      </div>
+      <div class="tc-actions">
+        ${t.status!=='done'
+          ? `<button class="act-btn inprog" onclick="setStatus(${t.id},'inprogress')">▶ In Progress</button>
+             <button class="act-btn stuck-btn" onclick="setStatus(${t.id},'stuck')">⚠ Stuck</button>
+             <button class="act-btn complete" onclick="setStatus(${t.id},'done')">✓ Done</button>`
+          : `<span class="done-label">✅ Completed</span>
+             <button class="act-btn reopen" onclick="setStatus(${t.id},'open')">↩ Reopen</button>`
+        }
+        <button class="act-btn" onclick="editTask(${t.id})" style="margin-left:${t.status==='done'?'0':'auto'}">✏️ Edit</button>
+        <button class="act-btn del" onclick="deleteTask(${t.id})">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+render();
+
+// ─── PWA INSTALL ──────────────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $('installBanner').classList.remove('hidden');
+});
+$('installBtn').onclick = async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') $('installBanner').classList.add('hidden');
+  deferredPrompt = null;
+};
+window.addEventListener('appinstalled', () => {
+  $('installBanner').classList.add('hidden');
+  showToast('🎉 App installed successfully!');
+});
+
+// ─── SERVICE WORKER ───────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .catch(err => console.log('SW reg failed:', err));
+  });
+}
+</script>
+</body>
+</html>
